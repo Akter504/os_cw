@@ -1,0 +1,13 @@
+{
+  "loggers": [
+      {
+          "name": "file_logger",
+          "file_path": "C:\\labs mai\\logfile.txt",
+          "severity_levels": ["debug", "information"]
+      },
+      {
+          "name": "console_logger",
+          "severity_levels": ["information"]
+      }
+  ]
+}

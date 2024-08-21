@@ -1,0 +1,12 @@
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::allocate(void *) available size is 168 bytes 
+
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::allocate(void *) available size is 36 bytes 
+
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::deallocate(void *) available size is 168 bytes 
+
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::allocate(void *) available size is 168 bytes 
+
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::deallocate(void *) available size is 300 bytes 
+
+09:30:23 03.05.2024 INFORMATION allocator_boundary_tags::deallocate(void *) available size is 432 bytes 
+

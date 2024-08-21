@@ -1,0 +1,8 @@
+21:37:56 25.07.2024 TRACE binarySearchTreePositiveTests.test13 started 
+
+21:37:56 25.07.2024 TRACE binary_search_tree<tkey, tvalue>::obtain_between(tkey const &, tkey const &, bool, bool) : called. 
+
+21:37:56 25.07.2024 TRACE binary_search_tree<tkey, tvalue>::obtain_between(tkey const &, tkey const &, bool, bool) : successfuly finished. 
+
+21:37:56 25.07.2024 TRACE binarySearchTreePositiveTests.test13 finished 
+

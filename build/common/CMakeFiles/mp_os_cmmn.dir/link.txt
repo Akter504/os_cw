@@ -1,0 +1,2 @@
+C:\LABSMA~1\mingw64\bin\ar.exe qc libmp_os_cmmn.a CMakeFiles/mp_os_cmmn.dir/src/not_implemented.cpp.obj CMakeFiles/mp_os_cmmn.dir/src/operation_not_supported.cpp.obj
+C:\LABSMA~1\mingw64\bin\ranlib.exe libmp_os_cmmn.a
