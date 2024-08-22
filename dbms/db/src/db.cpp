@@ -19,13 +19,13 @@ db::collection::collection(
 {
     switch (tree_variant)
     {
-        case search_tree_variant::b:
+        case b_tree_variants::b:
             //break;
-        case search_tree_variant::b_plus:
+        case b_tree_variants::b_plus:
             //break;
-        case search_tree_variant::b_star:
+        case b_tree_variants::b_star:
             //break;
-        case search_tree_variant::b_star_plus:
+        case b_tree_variants::b_star_plus:
             //break;
         default:
             _data = new b_tree<flyweight_tkey, tdata *>(t_for_b_trees, tkey_comparer());
@@ -483,9 +483,16 @@ std::vector<std::pair<tkey,tvalue>> db::collection::obtain_between(
 }
 
 std::pair<tkey, tvalue> db::obtain_min(
-		std::string const &pool_name,
-		std::string const &schema_name,
-		std::string const &collection_name)
+		std::string const &path)
+{ }
+
+std::pair<tkey, tvalue> db::obtain_max(
+		std::string const &path)
+{ }
+
+std::pair<tkey, tvalue> db::obtain_next(
+		std::string const &path,
+        tkey const &key)
 { }
 
 void db::collection::move_from(collection &&other)
@@ -493,13 +500,13 @@ void db::collection::move_from(collection &&other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
@@ -524,13 +531,13 @@ void db::collection::copy_from(collection const &other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
@@ -563,25 +570,25 @@ void db::collection::clear()
 #pragma endregion collection implementation
 
 #pragma region schema implementation
-
+// TODO EXCEPTION FOR ADD, DISPOSE, OBTAIN;
 db::schema::schema(
-    search_tree_variant const &tree_variant,
+    b_tree_variants tree_variant,
     size_t t_for_b_trees):
     _tree_variant(tree_variant)
 {
     switch(tree_variant):
-        case search_tree_variants::b:
+        case b_tree_variantss::b:
             //break;
-        case search_tree_variant::b_plus:
+        case b_tree_variants::b_plus:
         //break;
-        case search_tree_variant::b_star:
+        case b_tree_variants::b_star:
             //break;
-        case search_tree_variant::b_star_plus:
+        case b_tree_variants::b_star_plus:
             //break;
         default:
             try
             {
-                _collections = new b_tree<std::shared_ptr<std::string>, collection>(t_for_b_trees);
+                _collections = new b_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>>(t_for_b_trees);
             }
             catch(std::bad_alloc const &)
             {
@@ -628,6 +635,55 @@ db::schema::~schema()
     clear();
 }
 
+void db::schema::add(
+    std::string const &collection_name,
+    b_tree_variants tree_variant,
+    allocator_variant allocator_variant,
+    allocator_with_fit_mode::fit_mode fit_mode,
+    size_t t_for_b_trees):
+        _tree_variant(tree_variant)
+{
+    try
+    {
+        _collections->insert(collection_name, collection(tree_variant, allocator_variant, fit_mode, t_for_b_trees));
+    }
+    catch (search_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>>::insertion_of_existent_key_attempt_exception_exception const &)
+    {
+        throw db::insertion_of_existent_struct_attempt_exception();
+        // TODO LOG;
+    }
+}
+
+collection db::schema::dispose(
+    std::string const &collection_name)
+{
+    collection value;
+    try
+    {
+        value = _collections->dispose(collection_name);
+    }
+    catch(search_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>>::disposal_of_nonexistent_key_attempt_exception() const &)
+    {
+        throw db::disposal_of_nonexistent_key_attempt_exception();
+    }
+    return value;
+    
+}
+		
+collection db::schema::&obtain(
+    std::string const &collection_name)
+{
+    try
+    {
+        return _collections->obtain(collection_name);
+    }
+    catch (std::shared_ptr<std::string>, std::shared_ptr<collection>>::obtaining_of_nonexistent_key_attempt_exception const &)
+    {
+        throw db::obtaining_of_nonexistent_key_attempt_exception();
+        // TODO LOG;
+    }
+}
+
 void db::schema::clear()
 {
     delete _collections;
@@ -639,19 +695,19 @@ void db::schema::copy_from(schema const &other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
         {
-            _data = new b_tree<std::shared_ptr<std::string>, collection>(
-                *dynamic_cast<b_tree<std::shared_ptr<std::string>, collection> *>(other._collections));
+            _collections = new b_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>>(
+                *dynamic_cast<b_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>> *>(other._collections));
         }
         catch (std::bad_alloc const &)
         {
@@ -667,19 +723,19 @@ void db::schema::move_from(schema const &other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
         {
-            _data = new b_tree<std::shared_ptr<std::string>, collection>(
-                std::move(*dynamic_cast<b_tree<std::shared_ptr<std::string>, collection> *>(other._collections)));
+            _collections = new b_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>>(
+                std::move(*dynamic_cast<b_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>> *>(other._collections)));
         }
         catch (std::bad_alloc const &)
         {
@@ -693,25 +749,25 @@ void db::schema::move_from(schema const &other)
 #pragma endregion schema implementation
 
 #pragma region pool implementation
-
+// TODO EXCEPTION FOR ADD, DISPOSE, OBTAIN;
 db::pool::pool(
-    search_tree_variant const &tree_variant,
+    b_tree_variants const &tree_variant,
     size_t t_for_b_trees):
     _tree_variant(tree_variant)
 {
     switch(tree_variant):
-        case search_tree_variants::b:
+        case b_tree_variantss::b:
             //break;
-        case search_tree_variant::b_plus:
+        case b_tree_variants::b_plus:
         //break;
-        case search_tree_variant::b_star:
+        case b_tree_variants::b_star:
             //break;
-        case search_tree_variant::b_star_plus:
+        case b_tree_variants::b_star_plus:
             //break;
         default:
             try
             {
-                _collections = new b_tree<std::shared_ptr<std::string>, schema>(t_for_b_trees);
+                _schemas = new b_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>>(t_for_b_trees);
             }
             catch(std::bad_alloc const &)
             {
@@ -758,6 +814,54 @@ db::pool::~pool()
     clear();
 }
 
+void db::pool::add(
+    std::string const &schema_name,
+    b_tree_variants tree_variant,
+    size_t t_for_b_trees)
+{
+    try
+    {
+        _schemas->insert(schema_name, schema(tree_variant, t_for_b_trees));
+    }
+    catch (search_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>>::insertion_of_existent_key_attempt_exception_exception const &)
+    {
+        throw db::insertion_of_existent_struct_attempt_exception();
+        // TODO LOG;
+    }
+    
+}
+
+schema db::pool::dispose(
+    std::string const &schema_name)
+{
+    schema value;
+    try
+    {
+       value = _schemas->dispose(schema_name);
+    }
+    catch (search_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>>::disposal_of_nonexistent_key_attempt_exception() const &)
+    {
+        throw db::disposal_of_nonexistent_key_attempt_exception();
+        // TODO LOG;
+    }
+    return value;
+}
+
+schema db::pool::&obtain(
+    std::string const &schema_name)
+{
+    try
+    {
+       return _schemas->obtain(schema_name);
+    }
+    catch (search_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>>::obtaining_of_nonexistent_key_attempt_exception const &)
+    {
+        throw db::obtaining_of_nonexistent_key_attempt_exception();
+        // TODO LOG;
+    }
+    return value;
+}
+
 void db::pool::clear()
 {
     delete _schemas;
@@ -769,19 +873,19 @@ void db::pool::copy_from(pool const &other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
         {
-            _data = new b_tree<std::shared_ptr<std::string>, schema>(
-                *dynamic_cast<b_tree<std::shared_ptr<std::string>, schema> *>(other._schemas));
+            _schemas = new b_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>>(
+                *dynamic_cast<b_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>> *>(other._schemas));
         }
         catch (std::bad_alloc const &)
         {
@@ -797,19 +901,19 @@ void db::schema::move_from(schema const &other)
     _tree_variant = other._tree_variant;
     switch (_tree_variant)
     {
-    case search_tree_variant::b:
+    case b_tree_variants::b:
         //break;
-    case search_tree_variant::b_plus:
+    case b_tree_variants::b_plus:
         //break;
-    case search_tree_variant::b_star:
+    case b_tree_variants::b_star:
         //break;
-    case search_tree_variant::b_star_plus:
+    case b_tree_variants::b_star_plus:
         //break;
     default:
         try
         {
-            _data = new b_tree<std::shared_ptr<std::string>, schema>(
-                std::move(*dynamic_cast<b_tree<std::shared_ptr<std::string>, schema> *>(other._schemas)));
+            _schemas = new b_tree<std::shared_ptr<std::string>, schema>(
+                std::move(*dynamic_cast<std::shared_ptr<std::string>, std::shared_ptr<schema>> *>(other._schemas)));
         }
         catch (std::bad_alloc const &)
         {

@@ -102,9 +102,9 @@ protected:
     public:
 
         explicit collection(
-            b_tree_variants const &tree_variant,
-            allocators_variant const &allocator_variant,
-            allocator_with_fit_mode::fit_mode const &mode,
+            b_tree_variants tree_variant,
+            allocators_variant allocator_variant,
+            allocator_with_fit_mode::fit_mode mode,
             size_t t_for_b_trees = 8);
 
     public:
@@ -119,6 +119,16 @@ protected:
             bool const &lower_bound_inclusive,
             bool const &upper_bound_inclusive,   
             std::string const &path);
+		
+		std::pair<tkey, tvalue> obtain_min(
+			std::string const &path);
+		
+		std::pair<tkey, tvalue> obtain_max(
+			std::string const &path);
+		
+		std::pair<tkey, tvalue> obtain_next(
+			std::string const &path,
+			tkey const &key);
         
         void insert(
             tkey const &key,
@@ -143,6 +153,8 @@ protected:
         tvalue dispose(
             tkey const &key,
             std::string const &path);
+		
+		size_t get_records_cnt();
 
     private:
 	
@@ -160,7 +172,7 @@ protected:
     {
         private:
 
-            search_tree<std::shared_ptr<std::string>, collection> *_collections;
+            search_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>> *_collections;
             search_tree_variant _tree_variant;
         
         public:
@@ -183,12 +195,12 @@ protected:
 	
 		void add(
 			std::string const &collection_name,
-			search_tree_variant tree_variant,
+			b_tree_variants tree_variant,
 			allocator_variant allocator_variant,
 			allocator_with_fit_mode::fit_mode fit_mode,
 			size_t t_for_b_trees = 8);
 		
-		void dispose(
+		collection dispose(
 			std::string const &collection_name);
 		
 		collection &obtain(
@@ -197,7 +209,7 @@ protected:
     public:
 
         explicit schema(
-            b_tree_variants const &tree_variant);
+            b_tree_variants tree_variant);
 
 	public:
 	
@@ -216,7 +228,7 @@ protected:
     {
         private:
 
-            search_tree<std::shared_ptr<std::string>, schema> *_schemas;
+            search_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>> *_schemas;
             search_tree_variant _tree_variant;
 
         public:
@@ -247,7 +259,7 @@ protected:
 			search_tree_variant tree_variant,
 			size_t t_for_b_trees = 8);
 		
-		void dispose(
+		schema dispose(
 			std::string const &schema_name);
 		
 		schema &obtain(
