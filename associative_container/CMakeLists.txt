@@ -1,20 +1,20 @@
 cmake_minimum_required(VERSION 3.21)
-project(mp_os_assctv_cntnr)
+project(os_cw_assctv_cntnr)
 
 add_subdirectory(search_tree)
 add_library(
-        mp_os_assctv_cntnr
+        os_cw_assctv_cntnr
         include/associative_container.h)
 target_include_directories(
-        mp_os_assctv_cntnr
+        os_cw_assctv_cntnr
         PUBLIC
         ./include)
 target_link_libraries(
-        mp_os_assctv_cntnr
+        os_cw_assctv_cntnr
         PUBLIC
-        mp_os_cmmn)
+        os_cw_cmmn)
 set_target_properties(
-        mp_os_assctv_cntnr PROPERTIES
+        os_cw_assctv_cntnr PROPERTIES
         VERSION 1.0
         DESCRIPTION "associative container interface library"
         LANGUAGES CXX

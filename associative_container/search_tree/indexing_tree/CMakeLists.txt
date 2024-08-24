@@ -4,7 +4,7 @@ project(os_cw_assctv_cntnr_srch_tr_indxng_tr_b_tr)
 #add_subdirectory(tests)
 add_library(
         os_cw_assctv_cntnr_srch_tr_indxng_tr_b_tr
-        include/b_tree.h)
+        b_tree/include/b_tree.h)
 target_include_directories(
         os_cw_assctv_cntnr_srch_tr_indxng_tr_b_tr
         PUBLIC

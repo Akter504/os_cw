@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 3.21)
-project(mp_os_allctr_allctr_srtd_lst)
+project(os_cw_allctr_allctr_srtd_lst)
 
 add_subdirectory(tests)
 add_library(
-        mp_os_allctr_allctr_srtd_lst
+        os_cw_allctr_allctr_srtd_lst
         src/allocator_sorted_list.cpp)
 target_include_directories(
-        mp_os_allctr_allctr_srtd_lst
+        os_cw_allctr_allctr_srtd_lst
         PUBLIC
         ./include)
 target_link_libraries(
-        mp_os_allctr_allctr_srtd_lst
+        os_cw_allctr_allctr_srtd_lst
         PUBLIC
-        mp_os_cmmn)
+        os_cw_cmmn)
 target_link_libraries(
-        mp_os_allctr_allctr_srtd_lst
+        os_cw_allctr_allctr_srtd_lst
         PUBLIC
-        mp_os_lggr_lggr)
+        os_cw_lggr_lggr)
 target_link_libraries(
-        mp_os_allctr_allctr_srtd_lst
+        os_cw_allctr_allctr_srtd_lst
         PUBLIC
-        mp_os_allctr_allctr)
+        os_cw_allctr_allctr)
 set_target_properties(
-        mp_os_allctr_allctr_srtd_lst PROPERTIES
+        os_cw_allctr_allctr_srtd_lst PROPERTIES
         LANGUAGES CXX
         LINKER_LANGUAGE CXX
         CXX_STANDARD 14

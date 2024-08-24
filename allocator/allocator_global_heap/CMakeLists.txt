@@ -1,28 +1,28 @@
 cmake_minimum_required(VERSION 3.21)
-project(mp_os_allctr_allctr_glbl_hp)
+project(os_cw_allctr_allctr_glbl_hp)
 
 add_subdirectory(tests)
 add_library(
-        mp_os_allctr_allctr_glbl_hp
+        os_cw_allctr_allctr_glbl_hp
         src/allocator_global_heap.cpp)
 target_include_directories(
-        mp_os_allctr_allctr_glbl_hp
+        os_cw_allctr_allctr_glbl_hp
         PUBLIC
         ./include)
 target_link_libraries(
-        mp_os_allctr_allctr_glbl_hp
+        os_cw_allctr_allctr_glbl_hp
         PUBLIC
-        mp_os_cmmn)
+        os_cw_cmmn)
 target_link_libraries(
-        mp_os_allctr_allctr_glbl_hp
+        os_cw_allctr_allctr_glbl_hp
         PUBLIC
-        mp_os_lggr_lggr)
+        os_cw_lggr_lggr)
 target_link_libraries(
-        mp_os_allctr_allctr_glbl_hp
+        os_cw_allctr_allctr_glbl_hp
         PUBLIC
-        mp_os_allctr_allctr)
+        os_cw_allctr_allctr)
 set_target_properties(
-        mp_os_allctr_allctr_glbl_hp PROPERTIES
+        os_cw_allctr_allctr_glbl_hp PROPERTIES
         LANGUAGES CXX
         LINKER_LANGUAGE CXX
         CXX_STANDARD 14

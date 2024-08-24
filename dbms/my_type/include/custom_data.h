@@ -9,11 +9,15 @@ class tvalue
 {
 
 public:
-    std::string name;
+
+    std::shared_ptr<flyweight_string> _fw_value;
+    uint64_t _n_value;
 
 public:
+
     tvalue();
-    tvalue(std::string &name);
+    tvalue(std::string const &svalue,
+        uint64_t nvalue);
 
 };
 

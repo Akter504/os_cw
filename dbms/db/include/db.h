@@ -282,19 +282,19 @@ private:
 
 	size_t _id;
 	mode _mode;
-	b_tree<std::shared_ptr<std::string>, pool> _pools;
+	b_tree<std::shared_ptr<std::string>, std::shared_ptr<pool>> _pools;
 
 public:
 
-	static db_storage *get_instance();
+	static db *get_instance();
 
 public:
 
-	db_storage(
-		db_storage const &) = delete;
+	db(
+		db const &) = delete;
 	
-	db_storage(
-		db_storage &&) = delete;
+	db(
+		db &&) = delete;
 
 public:
 
@@ -302,34 +302,34 @@ public:
 
 public:
 
-	db_storage *setup(
+	db *setup(
 		size_t id,
 		mode mode);
 	
-	db_storage *load_db(
+	db *load_db(
 		std::string path);
 		
-	db_storage *clear();
+	db *clear();
 
-	db_storage *add_pool(
+	db *add_pool(
 		std::string const &pool_name,
 		search_tree_variant tree_variant,
 		size_t t_for_b_trees = 8);
 	
-	db_storage *dispose_pool(
+	db *dispose_pool(
 		std::string const &pool_name);
 	
-	db_storage *add_schema(
+	db *add_schema(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		search_tree_variant tree_variant,
 		size_t t_for_b_trees = 8);
 	
-	db_storage *dispose_schema(
+	db *dispose_schema(
 		std::string const &pool_name,
 		std::string const &schema_name);
 	
-	db_storage *add_collection(
+	db *add_collection(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
@@ -338,33 +338,33 @@ public:
 		allocator_with_fit_mode::fit_mode fit_mode,
 		size_t t_for_b_trees = 8);
 	
-	db_storage *dispose_collection(
+	db *dispose_collection(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name);
 	
-	db_storage *add(
+	db *add(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
 		tkey const &key,
 		tvalue const &value);
 	
-	db_storage *add(
+	db *add(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
 		tkey const &key,
 		tvalue &&value);
 	
-	db_storage *update(
+	db *update(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
 		tkey const &key,
 		tvalue &&value);
 	
-	db_storage *update(
+	db *update(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
@@ -408,7 +408,7 @@ public:
 		std::string const &collection_name,
 		tkey const &key);
 	
-	db_storage *consolidate();
+	db *consolidate();
 
 	size_t get_collection_records_cnt(
 		std::string const &pool_name,
@@ -417,7 +417,7 @@ public:
 
 private:
 
-	db_storage();
+	db();
 
 private:
 
@@ -442,6 +442,15 @@ private:
 		std::string pool_name,
 		std::string schema_name,
 		std::string collection_name);
+
+private:
+	
+	db &throw_if_initialized_at_setup();
+	db &throw_if_unitialized();
+	db &throw_if_invalid_setup(size_t id, db::mode mode);
+	db &throw_if_invalid_path();
+	db &throw_if_invalid_file_name();
+
 
     
 };

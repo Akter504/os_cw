@@ -931,3 +931,41 @@ static db *db::get_instance()
     static auto *instance = new db_storage();
     return instance;
 }
+
+db *db::setup(size_t id,
+    mode mode);
+        _id(id),
+        _mode(mode);
+{ }
+
+db *db::load_db(std::string const &path)
+{
+    // TODO SERVER
+}
+
+db* db::clear()
+{
+    if (get_instance()->_mode == mode::in_memory_cache)
+    {
+        return this;
+    }
+
+    if (access("pools", F_OK) == -1)
+    {
+        return this;
+    }
+}
+
+db *db::add_pool(
+    std::string const &pool_name,
+    db::b_tree_variants tree_variant,
+    size_t t_for_b_trees)
+{
+    std::string path = extra_utility::make_path({"pools", pool_name});
+}
+
+db *db::get_instance()
+{ }
+
+void db::collect_garbage(std::string const &path)
+{ }
