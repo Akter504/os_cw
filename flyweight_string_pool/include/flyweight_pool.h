@@ -1,3 +1,6 @@
+#ifndef OPERATING_SYSTEMS_COURSE_WORK_FLYWEIGHT_POOL_H
+#define OPERATING_SYSTEMS_COURSE_WORK_FLYWEIGHT_POOL_H
+
 #include <string>
 #include <memory>
 #include <map>
@@ -15,7 +18,7 @@ public:
     flyweight_string(
         std::string const &str);
 
-private:
+public:
 
     std::string get_str() const;
 
@@ -50,3 +53,5 @@ private:
     flyweight_string_pool& operator=(const flyweight_string_pool&) = delete;
 
 };
+
+#endif //OPERATING_SYSTEMS_COURSE_WORK_FLYWEIGHT_POOL_H

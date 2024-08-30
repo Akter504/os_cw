@@ -31,7 +31,7 @@ std::shared_ptr<flyweight_string> flyweight_string_pool::make_flyweight(std::str
 
 void flyweight_string_pool::consolidate()
 {
-    for (auto iter = _flyweight_pool.begin(); iter != _flyweight_pool.end())
+    for (auto iter = _flyweight_pool.begin(); iter != _flyweight_pool.end();)
     {
         if (iter->second.use_count() == 1)
         {

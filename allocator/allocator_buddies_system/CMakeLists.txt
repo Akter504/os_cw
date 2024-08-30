@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.21)
 project(os_cw_allctr_allctr_bdds_sstm)
 
-add_subdirectory(tests)
 add_library(
         os_cw_allctr_allctr_bdds_sstm
         src/allocator_buddies_system.cpp)

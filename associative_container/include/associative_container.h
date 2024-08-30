@@ -1,5 +1,5 @@
-#ifndef MATH_PRACTICE_AND_OPERATING_SYSTEMS_TEMPLATE_REPO_ASSOCIATIVE_CONTAINER_H
-#define MATH_PRACTICE_AND_OPERATING_SYSTEMS_TEMPLATE_REPO_ASSOCIATIVE_CONTAINER_H
+#ifndef OPERATING_SYSTEMS_COURSE_WORK_ASSOCIATIVE_CONTAINER_H
+#define OPERATING_SYSTEMS_COURSE_WORK_ASSOCIATIVE_CONTAINER_H
 
 #include <iostream>
 #include <vector>
@@ -11,6 +11,23 @@ template<
 class associative_container
 {
 
+protected:
+
+    class default_key_comparer final
+    {
+
+    public:
+        
+        int operator()(
+            int first,
+            int second);
+        
+        int operator()(
+            std::string const &first,
+            std::string const &second);
+        
+    };
+
 public:
     
     struct key_value_pair final
@@ -20,74 +37,17 @@ public:
         
         tkey key;
         tvalue value;
-
+    
     public:
-
+    
         key_value_pair(
             tkey const &key,
-            tvalue const &value):
-                key(key),
-                value(value)
-        {
-
-        }
-
-        key_value_pair(
-            tkey const &key,
-            tvalue &&value):
-                key(key),
-                value(std::move(value))
-        {
-
-        }
-
-        key_value_pair(
-            key_value_pair const &other):
-            key(other.key),
-            value(other.value)
-        {
-            int x = 10;
-        }
-
-        key_value_pair(
-            key_value_pair &&other) noexcept:
-            key(other.key),
-            value(std::move(other.value))
-        {
-
-        }
-
-        key_value_pair &operator=(
-            key_value_pair const &other)
-        {
-            if (this != &other)
-            {
-                key = other.key;
-                value = other.value;
-            }
-
-            return *this;
-        }
-
-
-
-        key_value_pair &operator=(
-            key_value_pair &&other) noexcept
-        {
-            if (this != &other)
-            {
-                key = other.key;
-                value = std::move(other.value);
-            }
-
-            return *this;
-        }
-
-        ~key_value_pair()
-        {
-            int x = 10;
-        }
+            tvalue const &value);
         
+        key_value_pair(
+            tkey const &key,
+            tvalue&& value);
+    
     };
     
     struct key_value_ptr_pair
@@ -97,18 +57,17 @@ public:
         
         tkey key;
         tvalue *value_ptr;
-
-    public:
-
-        key_value_ptr_pair(
-            tkey const &key,
-            tvalue *value_ptr):
-                key(key),
-                value_ptr(value_ptr)
-        {
-
-        }
         
+    };
+
+public:
+    
+    // TODO
+    struct associative_container_iterator
+    {
+    
+    public:
+    
     };
 
 public:
@@ -125,12 +84,66 @@ public:
         tkey const &key,
         tvalue &&value) = 0;
     
-    virtual tvalue const &obtain(
+    virtual void update(
+        tkey const &key,
+        tvalue const &value) = 0;
+    
+    virtual void update(
+        tkey const &key,
+        tvalue &&value) = 0;
+    
+    virtual tvalue &obtain(
         tkey const &key) = 0;
     
     virtual tvalue dispose(
         tkey const &key) = 0;
-    
+  
 };
 
-#endif //MATH_PRACTICE_AND_OPERATING_SYSTEMS_TEMPLATE_REPO_ASSOCIATIVE_CONTAINER_H
+template<
+    typename tkey,
+    typename tvalue>
+int associative_container<tkey, tvalue>::default_key_comparer::operator()(
+    int first,
+    int second)
+{
+    return first - second;
+}
+
+template<
+    typename tkey,
+    typename tvalue>
+int associative_container<tkey, tvalue>::default_key_comparer::operator()(
+    std::string const &first,
+    std::string const &second)
+{
+    if (first > second)
+    {
+        return 1;
+    }
+    else if (first == second)
+    {
+        return 0;
+    }
+    return -1;
+}
+
+template<
+    typename tkey,
+    typename tvalue>
+associative_container<tkey, tvalue>::key_value_pair::key_value_pair(
+    tkey const &key,
+    tvalue const &value):
+        key(key), value(value)
+{ }
+
+template<
+    typename tkey,
+    typename tvalue>
+associative_container<tkey, tvalue>::key_value_pair::key_value_pair(
+    tkey const &key,
+    tvalue&& value):
+        key(key), value(std::move(value))
+{ }
+
+#endif //OPERATING_SYSTEMS_COURSE_WORK_ASSOCIATIVE_CONTAINER_H
