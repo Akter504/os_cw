@@ -1,13 +1,40 @@
 #include <custom_data.h>
+#include <fstream>
+
+#pragma region comparer implementation
+
+int tkey_comparer::operator()(
+        tkey const &lhs,
+        tkey const &rhs) const
+{
+    if (lhs != rhs)
+	{
+		return lhs < rhs ? -1 : 1;
+	}
+	return 0;
+}
+	
+int tkey_comparer::operator()(
+    flyweight_tkey const &lhs,
+    flyweight_tkey const &rhs) const
+{
+    if (lhs.get()->get_str() != rhs.get()->get_str())
+	{
+		return lhs < rhs ? -1 : 1;
+	}
+	return 0;
+}
+
+#pragma end region comparer implementation
 
 #pragma region tvalue implementation
 
-tvalue::tvalue()
+tvalue::tvalue():
     _n_value(0),
     _fw_value(flyweight_string_pool::get_instance()->make_flyweight(""))
 { }
 
-tvalue::tvalue(std::string const &svalue, uint64_t nvalue)
+tvalue::tvalue(std::string const &svalue, uint64_t nvalue):
     _fw_value(flyweight_string_pool::get_instance()->make_flyweight(svalue)),
     _n_value(nvalue)
 { }
@@ -16,11 +43,11 @@ tvalue::tvalue(std::string const &svalue, uint64_t nvalue)
 
 #pragma region custom_data_ram implementation
 
-custom_data_ram::custom_data_ram(tvalue const &value)
+custom_data_ram::custom_data_ram(tvalue const &value):
     value(value)
 { }
 
-custom_data_ram::custom_data_ram(tvalue &&value)
+custom_data_ram::custom_data_ram(tvalue &&value):
     value(std::move(value))
 { }
 
@@ -28,7 +55,7 @@ custom_data_ram::custom_data_ram(tvalue &&value)
 
 #pragma region custom_data_ram implementation
 
-custom_data_file::custom_data_file(long file_pos)
+custom_data_file::custom_data_file(long file_pos):
     file_pos(file_pos)
 { }
 
@@ -38,7 +65,7 @@ void custom_data_file::serialize(
     tvalue const &value,
     bool update_flag)
 {
-    std::ofstream file(path, update_flag ? std::ios::in | std::ios::out | std::ios::binary : std::ios::out | std::ios::binary | std::ios::app);
+    std::ofstream file(path, std::ios::app | std::ios::binary);
 
     if (!file.is_open())
     {
@@ -47,7 +74,7 @@ void custom_data_file::serialize(
 
     if (update_flag && file_pos != -1)
     {
-        file.seekp(_file_pos);
+        file.seekp(file_pos);
     }
     else
     {
@@ -58,11 +85,11 @@ void custom_data_file::serialize(
     file.write(reinterpret_cast<char*>(&key_size), sizeof(size_t));
     file.write(key.c_str(), key_size);
 
-    file.write(reinterpret_cast<char*>(&value._n_value), sizeof(uint64_t));
+    file.write(reinterpret_cast<const char*>(&value._n_value), sizeof(uint64_t));
 
-    size_t value_size = value._fw_value.get()->get_data().size();
+    size_t value_size = value._fw_value.get()->get_str().size();
     file.write(reinterpret_cast<char*>(&value_size), sizeof(size_t));
-    file.write(value._fw_value.get()->get_data().c_str(), value_size);
+    file.write(value._fw_value.get()->get_str().c_str(), value_size);
 
     file.flush();
     if (file.fail())
@@ -91,8 +118,8 @@ tvalue custom_data_file::deserialize(std::string const &path) const
 	size_t value_len, key_len;
 	std::string fw_value;
 
-    file.read(reinterpret_cast<char*>(&key_size), sizeof(size_t));
-    file.seekg(key_size);
+    file.read(reinterpret_cast<char*>(&key_len), sizeof(size_t));
+    file.seekg(key_len);
 
     file.read(reinterpret_cast<char*>(&value._n_value), sizeof(uint64_t));
     

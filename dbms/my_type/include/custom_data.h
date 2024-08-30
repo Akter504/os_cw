@@ -1,9 +1,29 @@
+#ifndef OPERATING_SYSTEMS_COURSE_CUSTOM_TYPES
+#define OPERATING_SYSTEMS_COURSE_CUSTOM_TYPES
+
 #include <iostream>
 #include <allocator.h>
 #include <flyweight_pool.h>
 
 
-using flyweight_tkey = std::shared_ptr<std::string>;
+using flyweight_tkey = std::shared_ptr<flyweight_string>;
+using tkey = std::string;
+
+class tkey_comparer
+{
+
+public:
+
+    int operator()(
+        tkey const &lhs,
+        tkey const &rhs) const;
+	
+	int operator()(
+        flyweight_tkey const &lhs,
+        flyweight_tkey const &rhs) const;
+	
+
+};
 
 class tvalue
 {
@@ -24,7 +44,7 @@ public:
 class custom_data
 {
 
-protected:
+public:
     virtual ~custom_data() = default;
 
 };
@@ -33,7 +53,7 @@ class custom_data_ram final:
     public custom_data
 {
 
-private:
+public:
     tvalue value;
 
 public:
@@ -48,7 +68,7 @@ class custom_data_file final:
 {
 
 private:
-    long _file_pos;
+    long file_pos;
 
 public:
     custom_data_file(long file_pos = -1);
@@ -64,3 +84,6 @@ public:
 
 
 };
+
+
+#endif //OPERATING_SYSTEMS_COURSE_CUSTOM_TYPES

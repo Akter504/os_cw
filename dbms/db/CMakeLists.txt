@@ -39,7 +39,7 @@ target_link_libraries(
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
-        os_cw_allctr_allctr_buds_ssm)
+        os_cw_allctr_allctr_bdds_sstm)
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
@@ -47,11 +47,11 @@ target_link_libraries(
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
-        os_cw_allctr_allctr_rbt)
+        os_cw_allctr_allctr_rb_tr)
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
-        os_cw_allctr_allctr_std_lst)
+        os_cw_allctr_allctr_srtd_lst)
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC

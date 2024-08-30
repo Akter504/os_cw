@@ -1,13 +1,61 @@
+#ifndef OPERATING_SYSTEMS_COURSE_WORK_DB
+#define OPERATING_SYSTEMS_COURSE_WORK_DB
+
 #include <allocator.h>
+#include <allocator_with_fit_mode.h>
 #include <logger.h>
 #include <b_tree.h>
 #include <custom_data.h>
 #include <search_tree.h>
 #include <iostream>
 #include <memory>
+#include <extra_utility.h>
+#include <unistd.h>
 
 class db final
 {
+
+	class setup_failure final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		setup_failure(
+			std::string const &error_msg);
+		
+	};
+	
+	class invalid_path final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		invalid_path();
+		
+	};
+
+	class incorrect_file_name final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		incorrect_file_name();
+		
+	};
+
+	class logic_failure final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		logic_failure(
+			std::string const &error_msg);
+		
+	};
 
 	class obtaining_of_nonexistent_key_attempt_exception final:
 		public std::logic_error
@@ -19,15 +67,26 @@ class db final
 		
 	};
 
-	class insertion_of_existent_key_attempt_exception_exception final:
+	class insertion_of_existent_key_attempt_exception final:
 		public std::logic_error
 	{
 			
 	public:
 		
-		insertion_of_existent_key_attempt_exception_exception();
+		insertion_of_existent_key_attempt_exception();
 		
 	};
+
+	class insertion_of_existent_struct_attempt_exception final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		insertion_of_existent_struct_attempt_exception();
+		
+	};
+
 
 	class updating_of_nonexistent_key_attempt_exception final:
 		public std::logic_error
@@ -66,7 +125,7 @@ public:
 		b_star_plus
     };
 
-    enum class allocators_variant
+    enum class allocator_variant
     {
         global_heap,
 		sorted_list,
@@ -75,7 +134,7 @@ public:
 		red_black_tree
     };
 
-protected:
+public:
         
     class collection final:
         protected allocator_guardant
@@ -83,7 +142,7 @@ protected:
 
     private:
 
-        search_tree<std::shared_ptr<std::string>, custom_data*> _data;
+        search_tree<flyweight_tkey, custom_data*> *_data;
         b_tree_variants _tree_variant;
     	std::shared_ptr<allocator> _allocator;
 		allocator_variant _allocator_variant;
@@ -103,14 +162,14 @@ protected:
 
         explicit collection(
             b_tree_variants tree_variant,
-            allocators_variant allocator_variant,
+            allocator_variant allocator_variant,
             allocator_with_fit_mode::fit_mode mode,
             size_t t_for_b_trees = 8);
 
     public:
 
         tvalue obtain(
-            tkey cosnt &key, 
+            tkey const &key, 
             std::string const &path);
 
         std::vector<std::pair<tkey,tvalue>> obtain_between(
@@ -137,7 +196,7 @@ protected:
 
         void insert(
             tkey const &key,
-            tvalue const &&value,
+            tvalue &&value,
             std::string const &path);
         
         void update(
@@ -147,7 +206,7 @@ protected:
         
         void update(
             tkey const &key,
-            tvalue const &&value,
+            tvalue &&value,
             std::string const &path);
         
         tvalue dispose(
@@ -156,8 +215,17 @@ protected:
 		
 		size_t get_records_cnt();
 
+
+	protected:
+	
+		void consolidate(
+			std::string const &path);
+
     private:
 	
+		void collect_garbage(
+			std::string const &path);
+
 		[[nodiscard]] inline allocator *get_allocator() const final;
 
     private:
@@ -172,8 +240,8 @@ protected:
     {
         private:
 
-            search_tree<std::shared_ptr<std::string>, std::shared_ptr<collection>> *_collections;
-            search_tree_variant _tree_variant;
+            search_tree<flyweight_tkey, std::shared_ptr<collection>> *_collections;
+            b_tree_variants _tree_variant;
         
         public:
 	
@@ -209,7 +277,8 @@ protected:
     public:
 
         explicit schema(
-            b_tree_variants tree_variant);
+            b_tree_variants tree_variant,
+			size_t t_for_b_trees = 8);
 
 	public:
 	
@@ -228,8 +297,8 @@ protected:
     {
         private:
 
-            search_tree<std::shared_ptr<std::string>, std::shared_ptr<schema>> *_schemas;
-            search_tree_variant _tree_variant;
+            search_tree<flyweight_tkey, std::shared_ptr<schema>> *_schemas;
+            b_tree_variants _tree_variant;
 
         public:
 	
@@ -250,13 +319,14 @@ protected:
         public:
 
         explicit pool(
-            b_tree_variants const &tree_variant);
+            b_tree_variants tree_variant,
+			size_t t_for_b_trees = 8);
 
         public:
 	
 		void add(
 			std::string const &schema_name,
-			search_tree_variant tree_variant,
+			b_tree_variants tree_variant,
 			size_t t_for_b_trees = 8);
 		
 		schema dispose(
@@ -313,7 +383,7 @@ public:
 
 	db *add_pool(
 		std::string const &pool_name,
-		search_tree_variant tree_variant,
+		b_tree_variants tree_variant,
 		size_t t_for_b_trees = 8);
 	
 	db *dispose_pool(
@@ -322,7 +392,7 @@ public:
 	db *add_schema(
 		std::string const &pool_name,
 		std::string const &schema_name,
-		search_tree_variant tree_variant,
+		b_tree_variants tree_variant,
 		size_t t_for_b_trees = 8);
 	
 	db *dispose_schema(
@@ -333,7 +403,7 @@ public:
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
-		search_tree_variant tree_variant,
+		b_tree_variants tree_variant,
 		allocator_variant allocator_variant,
 		allocator_with_fit_mode::fit_mode fit_mode,
 		size_t t_for_b_trees = 8);
@@ -421,14 +491,9 @@ private:
 
 private:
 
-	void collect_garbage(
-		std::string const &path);
-
-private:
-
 	void add(
 		std::string const &pool_name,
-		search_tree_variant tree_variant,
+		b_tree_variants tree_variant,
 		size_t t_for_b_trees = 8);
 	
 	void dispose(
@@ -448,9 +513,11 @@ private:
 	db &throw_if_initialized_at_setup();
 	db &throw_if_unitialized();
 	db &throw_if_invalid_setup(size_t id, db::mode mode);
-	db &throw_if_invalid_path();
-	db &throw_if_invalid_file_name();
+	db &throw_if_invalid_path(std::string const &path);
+	db &throw_if_invalid_file_name(std::string const &file_name);
 
 
     
 };
+
+#endif //OPERATING_SYSTEMS_COURSE_WORK_DB
