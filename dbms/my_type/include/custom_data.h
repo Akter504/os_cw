@@ -49,20 +49,6 @@ public:
 
 };
 
-class custom_data_ram final:
-    public custom_data
-{
-
-public:
-    tvalue value;
-
-public:
-    custom_data_ram(tvalue const &value);
-    custom_data_ram(tvalue &&value);
-
-
-};
-
 class custom_data_file final:
     public custom_data
 {
@@ -82,8 +68,29 @@ public:
     tvalue deserialize(
 		std::string const &path) const;
 
+    long get_file_pos();
+
 
 };
+
+class custom_data_ram final:
+    public custom_data
+{
+
+public:
+    long file_rec_pos = -1;
+
+public:
+    tvalue value;
+
+public:
+    custom_data_ram(tvalue const &value);
+    custom_data_ram(tvalue &&value);
+public:
+
+
+};
+
 
 
 #endif //OPERATING_SYSTEMS_COURSE_CUSTOM_TYPES

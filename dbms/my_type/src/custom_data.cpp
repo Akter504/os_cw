@@ -18,11 +18,17 @@ int tkey_comparer::operator()(
     flyweight_tkey const &lhs,
     flyweight_tkey const &rhs) const
 {
-    if (lhs.get()->get_str() != rhs.get()->get_str())
-	{
-		return lhs < rhs ? -1 : 1;
-	}
-	return 0;
+    const std::string& lhs_str = lhs->get_str();
+    const std::string& rhs_str = rhs->get_str();
+    
+    if (lhs_str < rhs_str) 
+    {
+        return -1;
+    } else if (lhs_str > rhs_str) 
+    {
+        return 1;
+    }
+    return 0;
 }
 
 #pragma end region comparer implementation
@@ -65,21 +71,22 @@ void custom_data_file::serialize(
     tvalue const &value,
     bool update_flag)
 {
-    std::ofstream file(path, std::ios::app | std::ios::binary);
+    std::fstream file(path, std::ios::in | std::ios::out | std::ios::binary);
 
     if (!file.is_open())
     {
         throw std::ios::failure("Unable to open file for serialization");
     }
 
-    if (update_flag && file_pos != -1)
-    {
-        file.seekp(file_pos);
-    }
-    else
-    {
+    if (!update_flag && file_pos != -1)
+	{
+		file.seekp(file_pos, std::ios::beg);
+	}
+	else
+	{
+        file.seekp(0, std::ios::end);
         file_pos = file.tellp();
-    }
+	}
 
     size_t key_size = key.size();
     file.write(reinterpret_cast<char*>(&key_size), sizeof(size_t));
@@ -108,20 +115,20 @@ tvalue custom_data_file::deserialize(std::string const &path) const
         throw std::ios::failure("Unable to open file for serialization");
     }
 
-    if (file_pos != -1)
+    if (file_pos == -1)
     {
         throw std::logic_error("Invalid pointer to data");
     }
-    file.seekg(file_pos);
+    file.seekg(file_pos, std::ios::beg);
 
     tvalue value;
 	size_t value_len, key_len;
 	std::string fw_value;
 
     file.read(reinterpret_cast<char*>(&key_len), sizeof(size_t));
-    file.seekg(key_len);
+    file.seekg(key_len, std::ios::cur);
 
-    file.read(reinterpret_cast<char*>(&value._n_value), sizeof(uint64_t));
+    file.read(reinterpret_cast<char*>(&value._n_value), sizeof(size_t));
     
     file.read(reinterpret_cast<char*>(&value_len), sizeof(size_t));
     fw_value.resize(value_len);
@@ -143,5 +150,11 @@ tvalue custom_data_file::deserialize(std::string const &path) const
 
 
 }
+
+long custom_data_file::get_file_pos()
+{
+    return file_pos;
+}
+
 
 #pragma end region custom_data_ram implementation

@@ -3,7 +3,7 @@
 
 #include <map>
 #include <set>
-#include <C:\labs mai\C++\logger\logger\include\logger_builder.h>
+#include <logger_builder.h>
 #include "client_logger.h"
 #include "json.hpp"
 

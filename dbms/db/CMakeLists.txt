@@ -15,10 +15,6 @@ target_link_libraries(
 target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
-        os_cw_lggr_srvr_lggr)
-target_link_libraries(
-        os_cw_dbms_db_strg
-        PUBLIC
         os_cw_assctv_cntnr)
 target_link_libraries(
         os_cw_dbms_db_strg
@@ -65,6 +61,10 @@ target_link_libraries(
         os_cw_dbms_db_strg
         PUBLIC
         os_cw_dbms_my_types)
+target_link_libraries(
+        os_cw_dbms_db_strg
+        PUBLIC
+        os_cw_hndlr_files)
 set_target_properties(
         os_cw_dbms_db_strg PROPERTIES
         LANGUAGES CXX

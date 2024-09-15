@@ -25,6 +25,17 @@ class db final
 			std::string const &error_msg);
 		
 	};
+
+	class load_failure final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		load_failure(
+			std::string const &error_msg);
+		
+	};
 	
 	class invalid_path final:
 		public std::logic_error
@@ -46,15 +57,14 @@ class db final
 		
 	};
 
-	class logic_failure final:
+	class insertion_of_struct_failure final:
 		public std::logic_error
 	{
-			
+		
 	public:
-		
-		logic_failure(
-			std::string const &error_msg);
-		
+	
+        insertion_of_struct_failure();
+	
 	};
 
 	class obtaining_of_nonexistent_key_attempt_exception final:
@@ -108,6 +118,16 @@ class db final
 		
 	};
 
+	class disposal_of_nonexistent_struct_attempt_exception final:
+		public std::logic_error
+	{
+			
+	public:
+		
+		disposal_of_nonexistent_struct_attempt_exception();
+		
+	};
+
 public:
 
 	enum class mode
@@ -147,8 +167,8 @@ public:
     	std::shared_ptr<allocator> _allocator;
 		allocator_variant _allocator_variant;
 		allocator_with_fit_mode::fit_mode _fit_mode;
-        size_t _records_cnt;
-        size_t _disposed_cnt;
+        size_t _records_cnt = 0;
+        size_t _disposed_cnt = 0;
 
     public:
 
@@ -179,13 +199,13 @@ public:
             bool const &upper_bound_inclusive,   
             std::string const &path);
 		
-		std::pair<tkey, tvalue> obtain_min(
+		std::pair<flyweight_tkey, tvalue> obtain_min(
 			std::string const &path);
 		
-		std::pair<tkey, tvalue> obtain_max(
+		std::pair<flyweight_tkey, tvalue> obtain_max(
 			std::string const &path);
 		
-		std::pair<tkey, tvalue> obtain_next(
+		std::pair<flyweight_tkey, tvalue> obtain_next(
 			std::string const &path,
 			tkey const &key);
         
@@ -216,10 +236,16 @@ public:
 		size_t get_records_cnt();
 
 
-	protected:
-	
+	public:
+
 		void consolidate(
 			std::string const &path);
+
+		void load(
+			tkey const &key,
+			tvalue &&value,
+			std::string const &path,
+			long file_pos);
 
     private:
 	
@@ -229,7 +255,7 @@ public:
 		[[nodiscard]] inline allocator *get_allocator() const final;
 
     private:
-	
+
 		void clear();
         void move_from(collection &&other);
         void copy_from(collection const &other);
@@ -351,8 +377,8 @@ public:
 private:
 
 	size_t _id;
-	mode _mode;
-	b_tree<std::shared_ptr<std::string>, std::shared_ptr<pool>> _pools;
+	mode _mode = mode::uninitialized;
+	b_tree<flyweight_tkey, std::shared_ptr<pool>> _pools;
 
 public:
 
@@ -369,6 +395,7 @@ public:
 public:
 
 	size_t get_id();
+	mode get_mode();
 
 public:
 
@@ -377,7 +404,7 @@ public:
 		mode mode);
 	
 	db *load_db(
-		std::string path);
+		std::string const &path);
 		
 	db *clear();
 
@@ -462,17 +489,17 @@ public:
         bool lower_bound_inclusive,
         bool upper_bound_inclusive);
 	
-	std::pair<tkey, tvalue> obtain_min(
+	std::pair<flyweight_tkey, tvalue> obtain_min(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name);
 		
-	std::pair<tkey, tvalue> obtain_max(
+	std::pair<flyweight_tkey, tvalue> obtain_max(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name);
 		
-	std::pair<tkey, tvalue> obtain_next(
+	std::pair<flyweight_tkey, tvalue> obtain_next(
 		std::string const &pool_name,
 		std::string const &schema_name,
 		std::string const &collection_name,
@@ -496,17 +523,17 @@ private:
 		b_tree_variants tree_variant,
 		size_t t_for_b_trees = 8);
 	
-	void dispose(
+	db::pool dispose(
 		std::string const &pool_name);
 	
-	pool &obtain(
+	db::pool &obtain(
 		std::string const &pool_name);
 	
 	void load_collection(
-		std::string prefix,
-		std::string pool_name,
-		std::string schema_name,
-		std::string collection_name);
+		std::string const &prefix,
+		std::string const &ppool_name,
+		std::string const &pschema_name,
+		std::string const &pcollection_name);
 
 private:
 	
