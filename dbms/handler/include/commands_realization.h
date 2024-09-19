@@ -404,8 +404,8 @@ class obtain_value final:
 
 public:
 
-    obtain_value(db* db, uint64_t const &time):
-        command(db, time)
+    obtain_value(db* db):
+        command(db)
     { };
 
 public:
@@ -418,12 +418,34 @@ public:
         string_with_commands >> command;
         if (command == "read")
         {
+            std::string time_str = "", date_str = "";
             string_with_commands >> _pool_name >> _schema_name >> _collection_name >> _key;
             if (string_with_commands.fail())
             {
                 return false;
             }
-            return true;
+            string_with_commands >> time_str >> date_str;
+            std::tm tm = {};
+            std::stringstream ss;
+
+            if (date_str.empty() && time_str.empty())
+            {
+                this->_end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();  
+                return true;
+            }
+            else if (!date_str.empty() && !time_str.empty())
+            {
+                ss << date_str << " " << time_str;
+                ss >> std::get_time(&tm, "%Y::%m::%d %H::%M::%S");
+                if (ss.fail()) 
+                {
+                    throw std::runtime_error("Incorrect time or date in command");
+                }
+                auto time_point = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch()).count();
+                this->_end_time = ms;
+                return true;
+            }
         }
         return false;
     }
@@ -490,8 +512,8 @@ class obtain_between_value final:
 
 public:
 
-    obtain_between_value(db* db, uint64_t const &time):
-        command(db, time)
+    obtain_between_value(db* db):
+        command(db)
     { };
 
 public:
@@ -504,6 +526,7 @@ public:
         string_with_commands >> command;
         if (command == "read_between")
         {
+            std::string time_str = "", date_str = "";
             string_with_commands >> _pool_name >> _schema_name >> _collection_name >> _key_min >> _key_max;
             if (string_with_commands.fail())
             {
@@ -514,7 +537,28 @@ public:
             {
                 return false;
             }
-            return true;
+            string_with_commands >> time_str >> date_str;
+
+            std::tm tm = {};
+            std::stringstream ss;
+            if (date_str.empty() && time_str.empty())
+            {
+                this->_end_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();  
+                return true;
+            }
+            else if (!date_str.empty() && !time_str.empty())
+            {
+                ss << date_str << " " << time_str;
+                ss >> std::get_time(&tm, "%Y::%m::%d %H::%M::%S");
+                if (ss.fail()) 
+                {
+                    throw std::runtime_error("Incorrect time or date in command");
+                }
+                auto time_point = std::chrono::system_clock::from_time_t(std::mktime(&tm));
+                auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(time_point.time_since_epoch()).count();
+                this->_end_time = ms;
+                return true;
+            }
         }
         return false;
     }

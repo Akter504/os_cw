@@ -399,6 +399,8 @@ public:
 
 public:
 
+	void free_pools();
+
 	db *setup(
 		size_t id,
 		mode mode);
@@ -542,8 +544,6 @@ private:
 	db &throw_if_invalid_setup(size_t id, db::mode mode);
 	db &throw_if_invalid_path(std::string const &path);
 	db &throw_if_invalid_file_name(std::string const &file_name);
-
-
     
 };
 

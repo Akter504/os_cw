@@ -1349,6 +1349,11 @@ db *db::setup(
     return this;
 }
 
+void db::free_pools()
+{
+    _pools = b_tree<flyweight_tkey, std::shared_ptr<pool>>(8, tkey_comparer());
+}
+
 db *db::add_pool(
 		std::string const &pool_name,
 		b_tree_variants tree_variant,
@@ -2076,6 +2081,7 @@ db &db::throw_if_invalid_file_name(std::string const &file_name)
 
     return *this;
 }
+
 
 #pragma endregion exception_db implementation
 

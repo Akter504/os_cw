@@ -25,19 +25,6 @@ public:
     )
     {
         db_strg->get_instance()->setup(id,mode);
-        _chain
-            .add_handler(new add_pool(db_strg))
-            .add_handler(new add_schema(db_strg))
-            .add_handler(new add_collection(db_strg))
-            .add_handler(new add_value(db_strg, time_for_insert))
-            .add_handler(new dispose_pool(db_strg))
-            .add_handler(new dispose_schema(db_strg))
-            .add_handler(new dispose_collection(db_strg))
-            .add_handler(new dispose_value(db_strg, time_for_delete))
-            .add_handler(new obtain_value(db_strg, time_for_obtain))
-            .add_handler(new obtain_between_value(db_strg, time_for_obtain_between))
-            .add_handler(new update_value(db_strg, time_for_update))
-            .add_handler(new recovery_data(db_strg));
     }
 
 public:
@@ -56,12 +43,40 @@ public:
         {
             if (str_command.empty()) continue;
             if (str_command[str_command.length() - 1] == '\n') str_command.erase(str_command.length() - 1);
-            std::int64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 
-            while (!_chain.handle(str_command, current_time))
+            if (str_command == "exit")
             {
-                current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                std::cout << "End of program" << std::endl;
+                db_strg->get_instance()->clear();
+                break;
             }
+
+            std::istringstream part(str_command);
+            std::string word;
+            validation get_array;
+            part >> word;
+            bool is_command = 0;
+            for (auto elem : get_array._commands)
+            {
+                if (word == elem)
+                {
+                    is_command = 1;
+                }
+            }
+            
+            std::int64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();  
+            std::cout << "Check time: " << current_time << std::endl; 
+
+            if (word != "read" && word != "read_between")
+            {
+                _chain.check_command(str_command, current_time, db_strg->get_instance());
+            }
+            else
+            {
+                db_strg->get_instance()->free_pools();
+                _chain.process_chain(str_command, word, db_strg->get_instance());
+            }
+
          }
     }
 
@@ -78,19 +93,19 @@ public:
         std::cout << "Commands:" << std::endl;
 
         std::cout 
-        << "add_pool " << "<pool_name>" << "<b tree variant> " << "<t for b tree> " << std::endl
+        << "add_pool " << "<pool_name> " << "<b tree variant> " << "<t for b tree> " << std::endl
         << "add_schema " << "<pool_name> " << "<schema_name> " << "<b tree variant> " << "<t for b tree> " << std::endl
-        << "add_collection" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<b tree variant> "  << "<allocator variant> " << "<fit mode for allocator> " << "<t for b tree> " << std::endl
+        << "add_collection " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<b tree variant> "  << "<allocator variant> " << "<fit mode for allocator> " << "<t for b tree> " << std::endl
         << "delete_pool " << "<pool_name>" << std::endl
         << "delete_schema " << "<pool_name> " << "<schema_name> " << std::endl
-        << "delete_collection" << "<pool_name> " << "<schema_name> " << "<collection_name> " << std::endl
-        << "add" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << "<numeric value> " << "string value " << std::endl
-        << "delete" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << std::endl
-        << "read" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << std::endl
-        << "read_between" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id_min> " << "<id_max> " << "<lower_boundary_inclusive " << "<upper_boundary_inclusive " << std::endl
-        << "update" << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << std::endl
+        << "delete_collection " << "<pool_name> " << "<schema_name> " << "<collection_name> " << std::endl
+        << "add " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << "<numeric value> " << "string value " << std::endl
+        << "delete " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> "  << std::endl
+        << "read " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << "<time(HH::MM::SS)> " << "<date(YY::MM::DD)> " << std::endl
+        << "read_between " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id_min> " << "<id_max> " << "<lower_boundary_inclusive " << "<upper_boundary_inclusive " << "<time(HH::MM::SS)> " << "<date(YY::MM::DD)> " << std::endl
+        << "update " << "<pool_name> " << "<schema_name> " << "<collection_name> " << "<id> " << std::endl
         << "exit" << std::endl
-        << "insert_files" << "<file_name_1> " << "<file_name_2> " << "... " << "<file_name>" << std::endl
+        << "insert_files " << "<file_name_1> " << "<file_name_2> " << "... " << "<file_name>" << std::endl
         << "recovery_data " << "(ONLY IF THE DATA WAS STORED IN MEMORY)" << std::endl << std::endl;
 
         std::string str_command;
@@ -150,9 +165,15 @@ public:
             }
             std::int64_t current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();  
             std::cout << "Check time: " << current_time << std::endl; 
-            while (!_chain.handle(str_command, current_time))
+
+            if (word != "read" && word != "read_between")
             {
-                current_time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+                _chain.check_command(str_command, current_time, db_strg->get_instance());
+            }
+            else
+            {
+                db_strg->get_instance()->free_pools();
+                _chain.process_chain(str_command, word, db_strg->get_instance());
             }
         }
 
